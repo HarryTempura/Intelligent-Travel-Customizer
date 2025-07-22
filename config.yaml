@@ -1,5 +1,6 @@
 ollama:
   gemma3_4b: gemma3:4b
   qwen3_4b: qwen3:4b
+  qwen3_06b: qwen3:0.6b
   temperature: 0.7
   num_predict: 4096

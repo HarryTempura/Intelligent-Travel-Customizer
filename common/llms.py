@@ -12,3 +12,8 @@ OLLAMA_QWEN3_4B = ChatOllama(
     temperature=configs['ollama']['temperature'],
     num_predict=configs['ollama']['num_predict']
 )
+OLLAMA_QWEN3_06B = ChatOllama(
+    model=configs['ollama']['qwen3_06b'],
+    temperature=configs['ollama']['temperature'],
+    num_predict=configs['ollama']['num_predict']
+)
