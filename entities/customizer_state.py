@@ -1,6 +1,6 @@
-from typing import TypedDict
+from pydantic import BaseModel
 
 
-class CustomizerState(TypedDict):
+class CustomizerState(BaseModel):
     questions: list[str]
     answers: list[str]

@@ -1,3 +1,4 @@
+from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import StateGraph
 
@@ -27,3 +28,12 @@ def customizer_node(state=None):
     :param state:
     :return:
     """
+    graph = get_graph()
+
+    input_t = CustomizerState(questions=[], answers=[])
+    config = RunnableConfig(configurable={'thread_id': 1})
+
+    events = graph.stream(input_t, config, stream_mode='values')
+    for chunk in events:
+        print('=' * 80)
+        print(chunk)
