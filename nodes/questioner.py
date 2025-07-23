@@ -6,12 +6,15 @@ from entities.questions import Questions
 
 def questioner_node(state=None):
     """
+    并收集用户的回答，以便后续制定个性化的旅行计划。
 
-    :param state:
-    :return:
+    :param state: 当前用户的状态或上下文，本例中未使用。
+    :return: 返回一个字典，包含提问的问题列表和用户的回答。
     """
+    # 初始化大型语言模型，并指定输出结构为问题列表
     llm = OLLAMA_QWEN3_06B.with_structured_output(Questions)
 
+    # 定义系统消息模板，包含旅行定制师的指令和注意事项
     sys_template = """
 你是一名专业的旅行定制师。
 
@@ -21,9 +24,20 @@ def questioner_node(state=None):
 
 ### 注意！避免任何额外的输出！这是旅行定制最关键的一步！{}
     """.strip()
+    # 创建系统消息对象
     sys_message = SystemMessage(content=sys_template)
 
+    # 调用大型语言模型生成问题列表
     response = llm.invoke([sys_message])
     questions = response.questions
 
-    return {'questions': questions}
+    answers = []
+    # 遍历问题列表，与用户进行交互并收集回答
+    for question in questions:
+        print('Customizer:\n', question)
+
+        answer = input('User:\n')
+        answers.append(answer)
+
+    # 返回问题和回答的字典
+    return {'questions': questions, 'answers': answers}
