@@ -1,15 +1,10 @@
 from langchain_core.messages import HumanMessage
 from langchain_tavily import TavilySearch
 from langgraph.prebuilt import create_react_agent
-from langgraph.prebuilt.chat_agent_executor import AgentState
 
 from common.llms import OLLAMA_QWEN3_06B
 from entities.analysis import Analysis
-
-
-class AnalystState(AgentState):
-    demand: str
-    opt_recs: str
+from entities.customizer_dto import CustomizerDTO
 
 
 def get_agent():
@@ -44,8 +39,7 @@ def get_agent():
         model=llm,
         tools=tools,
         prompt=sys_prompt,
-        response_format=Analysis,
-        state_schema=AnalystState
+        response_format=Analysis
     )
 
     return react_agent
@@ -76,9 +70,30 @@ def analyst_node(state=None):
     human_template = f'这是我之前的对话信息，字典的 keys 是问题，字典的 values 是我的回答。{q_a}'
     human_message = HumanMessage(content=human_template)
 
+    dto = CustomizerDTO(messages=[human_message])
+
     # 调用agent进行分析处理
-    response = agent.invoke({'messages': [human_message]})
+    response = agent.invoke(dto)
     analysis: Analysis = response.get('structured_response')
 
     # 返回分析结果，包括需求和优化建议
     return {'demand': analysis.demand, 'opt_recs': analysis.opt_recs}
+
+
+def analyst_route(state):
+    """
+    根据用户的状态分析并返回其路由方向
+
+    :param state: 包含用户状态信息的字典，用于判断用户的路由方向
+    :return: 如果状态中包含 'none'（不区分大小写），则返回空字符串，否则返回 'questioner'
+    """
+    # 从用户状态中提取'opt_recs'字段的值
+    opt_recs = state['opt_recs']
+
+    # 判断'opt_recs'字段的值是否包含'none'（不区分大小写）
+    if 'none' in opt_recs.lower():
+        # 如果包含'none'，则返回空字符串，表示不进行路由
+        return ''
+    else:
+        # 如果不包含'none'，则返回'questioner'，表示路由到提问者
+        return 'questioner'
