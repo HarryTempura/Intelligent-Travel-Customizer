@@ -3,6 +3,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import StateGraph
 
 from entities.customizer_state import CustomizerState
+from nodes.analyst import analyst_node
 from nodes.questioner import questioner_node
 
 
@@ -14,8 +15,11 @@ def get_graph():
     graph_builder = StateGraph(CustomizerState)
 
     graph_builder.add_node('questioner', questioner_node)
+    graph_builder.add_node('analyst', analyst_node)
 
     graph_builder.set_entry_point('questioner')
+
+    graph_builder.add_edge('questioner', 'analyst')
 
     memory = InMemorySaver()
 
