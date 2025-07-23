@@ -30,7 +30,7 @@ def customizer_node(state=None):
     """
     graph = get_graph()
 
-    input_t = CustomizerState(questions=[], answers=[])
+    input_t = CustomizerState()
     config = RunnableConfig(configurable={'thread_id': 1})
 
     events = graph.stream(input_t, config, stream_mode='values')
