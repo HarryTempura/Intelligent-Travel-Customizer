@@ -20,7 +20,7 @@ def get_agent():
     tools.append(tool)
 
     # 绑定工具到大语言模型，创建具备工具调用能力的LLM实例
-    llm = OLLAMA_QWEN3_4B.bind_tools(tools)
+    llm = OLLAMA_QWEN3_4B
 
     # 定义系统提示词，明确智能体的角色和任务要求
     sys_prompt = """
@@ -88,7 +88,7 @@ def analyst_route(state):
     :return: 如果状态中包含 'none'（不区分大小写），则返回空字符串，否则返回 'questioner'
     """
     # 从用户状态中提取'opt_recs'字段的值
-    opt_recs = state['opt_recs']
+    opt_recs = state.opt_recs
 
     # 判断'opt_recs'字段的值是否包含 'none'（不区分大小写）
     if 'none' in opt_recs.lower():
