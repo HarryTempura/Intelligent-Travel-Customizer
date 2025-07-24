@@ -2,7 +2,7 @@ from langchain_core.messages import HumanMessage
 from langchain_tavily import TavilySearch
 from langgraph.prebuilt import create_react_agent
 
-from common.llms import OLLAMA_QWEN3_06B
+from common.llms import OLLAMA_QWEN3_4B
 from entities.analysis import Analysis
 from entities.customizer_dto import CustomizerDTO
 
@@ -15,12 +15,12 @@ def get_agent():
     """
     # 初始化工具列表，用于扩展智能体功能
     tools = []
-    # 添加Tavily搜索引擎工具，用于获取旅行相关信息
+    # 添加 Tavily 搜索引擎工具，用于获取旅行相关信息
     tool = TavilySearch(max_result=7)
     tools.append(tool)
 
     # 绑定工具到大语言模型，创建具备工具调用能力的LLM实例
-    llm = OLLAMA_QWEN3_06B.bind_tools(tools)
+    llm = OLLAMA_QWEN3_4B.bind_tools(tools)
 
     # 定义系统提示词，明确智能体的角色和任务要求
     sys_prompt = """
@@ -90,10 +90,10 @@ def analyst_route(state):
     # 从用户状态中提取'opt_recs'字段的值
     opt_recs = state['opt_recs']
 
-    # 判断'opt_recs'字段的值是否包含'none'（不区分大小写）
+    # 判断'opt_recs'字段的值是否包含 'none'（不区分大小写）
     if 'none' in opt_recs.lower():
-        # 如果包含'none'，则返回空字符串，表示不进行路由
+        # 如果包含 'none'，则返回空字符串，表示不进行路由
         return ''
     else:
-        # 如果不包含'none'，则返回'questioner'，表示路由到提问者
+        # 如果不包含 'none'，则返回 'questioner'，表示路由到提问者
         return 'questioner'

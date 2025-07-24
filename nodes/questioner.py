@@ -1,6 +1,6 @@
 from langchain_core.messages import SystemMessage
 
-from common.llms import OLLAMA_QWEN3_06B
+from common.llms import OLLAMA_QWEN3_4B
 from entities.questions import Questions
 
 
@@ -12,7 +12,7 @@ def questioner_node(state=None):
     :return: 返回一个字典，包含提问的问题列表和用户的回答。
     """
     # 初始化大型语言模型，并指定输出结构为问题列表
-    llm = OLLAMA_QWEN3_06B.with_structured_output(Questions)
+    llm = OLLAMA_QWEN3_4B.with_structured_output(Questions)
 
     # 定义系统消息模板，包含旅行定制师的指令和注意事项
     sys_template = """
