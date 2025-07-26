@@ -3,7 +3,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import StateGraph
 
 from entities.customizer_dto import CustomizerDTO
-from entities.customizer_state import CustomizerState
+from states.customizer_state import CustomizerState
 from nodes.analyst import analyst_node, analyst_route
 from nodes.questioner import questioner_node
 
