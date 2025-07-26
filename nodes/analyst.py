@@ -1,10 +1,13 @@
-from langchain_core.messages import HumanMessage
+from datetime import datetime
+
+from langchain_core.messages import AIMessage
 from langchain_tavily import TavilySearch
 from langgraph.prebuilt import create_react_agent
 
 from common.llms import OLLAMA_QWEN3_4B
 from entities.analysis import Analysis
 from entities.customizer_dto import CustomizerDTO
+from states.customizer_state import CustomizerState
 
 
 def get_agent():
@@ -29,7 +32,9 @@ def get_agent():
 ### 指令
 
 根据对话信息分析获得本次旅行的基本信息，并挖掘用户的诉求。然后总结好基本信息和诉求返回到 demand 字段。
-如果你认为还有信息需要确认完善请将需要确认的信息返回到 opt_recs 字段，如果没有则将 None 返回到 opt_recs 字段。
+如果你认为还有基本信息需要确认完善请将需要确认的信息返回到 opt_recs 字段一遍后续参考，如果没有则 opt_recs 字段设为 None。
+你有 Tavily 搜索工具可以调用，用户需要你确认的信息使用这个工具收集资料。
+只确认基本信息是否完善，不要过分注意细节。
 
 ### 注意！避免任何额外的输出！避免使用 markdown 格式！
     """.strip()
@@ -45,13 +50,15 @@ def get_agent():
     return react_agent
 
 
-def analyst_node(state=None):
+def analyst_node(state: CustomizerState = None):
     """
     分析节点函数，用于分析用户的问题和回答，提取需求和优化建议
 
     :param state: 状态对象，包含用户的问题列表和回答列表
     :return: 包含用户需求和优化建议的字典，格式为{'demand': 需求, 'opt_recs': 优化建议列表}
     """
+    print('=' * 40, 'analyst_node', '=' * 40)
+
     agent = get_agent()
 
     # 提取问题和回答列表
@@ -66,14 +73,20 @@ def analyst_node(state=None):
 
         q_a[question] = answer
 
-    # 构造人类消息模板，包含问题回答的对话信息
-    human_template = f'这是我之前的对话信息，字典的 keys 是问题，字典的 values 是我的回答。{q_a}'
-    human_message = HumanMessage(content=human_template)
+    # 构建 AIMessage
+    ai_template = f"""
+当前的时间是{datetime.now().strftime('%d/%m/%Y, %H:%M:%S')}。
+这是当前已经明确的基本信息{state.demand}
+这是 Python 字典形式的对话的历史信息，其中字典的键为问题，键值为对应问题的回答：{q_a}
+分析用户对于本次旅行的诉求。
+    """
+    ai_message = AIMessage(content=ai_template)
 
-    dto = CustomizerDTO(messages=[human_message])
+    # 构建输入信息
+    agent_input = CustomizerDTO(messages=[ai_message])
 
     # 调用agent进行分析处理
-    response = agent.invoke(dto)
+    response = agent.invoke(agent_input)
     analysis: Analysis = response.get('structured_response')
 
     # 返回分析结果，包括需求和优化建议
@@ -92,7 +105,7 @@ def analyst_route(state):
 
     # 判断'opt_recs'字段的值是否包含 'none'（不区分大小写）
     if 'none' in opt_recs.lower():
-        # 如果包含 'none'，则返回空字符串，表示不进行路由
+        # 如果包含 'none'，则返回 ''，表示路由到下一个节点
         return ''
     else:
         # 如果不包含 'none'，则返回 'questioner'，表示路由到提问者

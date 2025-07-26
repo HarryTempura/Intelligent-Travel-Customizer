@@ -34,6 +34,8 @@ def customizer_node(state=None):
     :param state:
     :return:
     """
+    print('=' * 40, 'customizer_node', '=' * 40)
+
     graph = get_graph()
 
     input_t = CustomizerDTO()
@@ -41,5 +43,4 @@ def customizer_node(state=None):
 
     events = graph.stream(input_t, config, stream_mode='values')
     for chunk in events:
-        print('=' * 80)
         print(chunk)
